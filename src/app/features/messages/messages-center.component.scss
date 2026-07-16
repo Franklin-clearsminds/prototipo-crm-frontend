@@ -256,19 +256,45 @@
   .templates-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     
     label {
       font-size: 0.8rem;
-      font-weight: 500;
-      color: #64748b;
+      font-weight: 600;
+      color: #475569;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
-    .form-control {
-      height: 36px;
-      padding: 4px 12px;
+    .templates-select {
+      flex: 1;
+      height: 38px;
+      padding: 0 36px 0 12px;
       font-size: 0.85rem;
+      color: #334155;
+      background-color: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      cursor: pointer;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+      &:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        background-color: #ffffff;
+      }
+
+      option {
+        font-size: 0.85rem;
+        color: #334155;
+        background-color: #ffffff;
+      }
     }
   }
 

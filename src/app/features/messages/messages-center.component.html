@@ -97,8 +97,8 @@
     <div class="chat-footer-controls" *ngIf="!activeConversation()?.optedOut">
       <!-- Templates -->
       <div class="templates-row">
-        <label>Plantillas:</label>
-        <select class="form-control text-sm" (change)="applyTemplate($event)">
+        <label>Aplicar plantilla:</label>
+        <select class="templates-select" (change)="applyTemplate($event)">
           <option value="">Seleccione una plantilla...</option>
           <option *ngFor="let tmp of templates" [value]="tmp.text">{{ tmp.name }}</option>
         </select>
@@ -136,5 +136,58 @@
     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <h3>Seleccione una conversación</h3>
     <p>Haga clic en un prospecto de la izquierda para abrir el historial de mensajería SMS y chatear en tiempo real.</p>
+  </div>
+</div>
+
+<!-- SMS PHONE LINE SELECTOR MODAL -->
+<div class="modal-backdrop animate-fade" *ngIf="showSmsLineSelector()" (click)="cancelSmsLineSelection()">
+  <div class="modal-content select-line-modal animate-slide-up" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Seleccionar Línea SMS</h2>
+      <button class="modal-close" (click)="cancelSmsLineSelection()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="select-line-desc">
+        Estás enviando el <strong>primer SMS</strong> a
+        <strong>{{ activeConversation()?.leadName }}</strong>
+        ubicado en <strong>{{ getLeadState() || activeConversation()?.leadPhone }}</strong>.
+        Seleccione la línea de salida. Se destacan las recomendaciones de presencia local:
+      </p>
+
+      <div class="lines-select-grid mt-4">
+        <div class="line-select-card"
+             *ngFor="let line of getPhoneLines()"
+             (click)="selectLineAndSend(line)"
+             [class.recommended]="getRecommendationReason(line, getLeadState()) !== ''">
+
+          <div class="line-card-main">
+            <div class="line-number-info">
+              <strong class="text-md">{{ line.number }}</strong>
+              <span class="text-xs text-slate">{{ line.city }}, {{ line.state }} ({{ line.provider }})</span>
+            </div>
+
+            <div class="recommend-tag" *ngIf="getRecommendationReason(line, getLeadState()) as reason">
+              <span class="badge-recommend">{{ reason }}</span>
+            </div>
+          </div>
+
+          <div class="line-card-stats mt-3">
+            <div class="stat-item text-xs">
+              <span>Riesgo de Spam: </span>
+              <strong [class.text-danger]="line.spamRiskScore > 50" [class.text-success]="line.spamRiskScore < 20">
+                {{ line.spamRiskScore }}%
+              </strong>
+            </div>
+            <div class="stat-item text-xs text-slate">
+              <span>Llamadas/SMS: </span>
+              <strong>{{ line.callsCount }} / {{ line.messagesCount }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cancelSmsLineSelection()">Cancelar</button>
+    </div>
   </div>
 </div>

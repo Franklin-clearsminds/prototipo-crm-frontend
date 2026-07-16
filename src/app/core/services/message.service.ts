@@ -130,9 +130,12 @@ export class MockMessageService {
     return this.conversationsSignal().find(c => c.leadId === leadId);
   }
 
-  sendMessage(conversationId: string, text: string, sender: 'agent' | 'system' = 'agent') {
+  sendMessage(conversationId: string, text: string, sender: 'agent' | 'system' = 'agent', lineId?: string): void {
     const lines = this.phoneLineService.getPhoneLines();
-    const assignedLine = lines.find(l => l.assignedAgentId === 'agent_1') || lines[0]; // mock active agent line
+    // Use specified line, or fall back to agent's assigned line
+    const assignedLine = lineId
+      ? lines.find(l => l.id === lineId)
+      : lines.find(l => l.assignedAgentId === 'agent_1') || lines[0];
     
     // Increment message count on physical line
     if (assignedLine) {
