@@ -1,0 +1,77 @@
+<div class="page-header">
+  <div class="page-title">
+    <h1>{{ t('rep.title') }}</h1>
+    <div class="breadcrumb">
+      <span>InsureFlow</span>
+      <span class="separator"></span>
+      <span class="active">{{ t('menu.reports') }}</span>
+    </div>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-secondary" (click)="exportFile('excel')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Exportar Excel
+    </button>
+    <button class="btn btn-danger" (click)="exportFile('pdf')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Descargar PDF
+    </button>
+  </div>
+</div>
+
+<!-- ANALYTICS MINI GRID -->
+<div class="metrics-grid">
+  <div class="metric-card card">
+    <span class="card-label">Total Llamadas Realizadas</span>
+    <span class="card-count">1,382</span>
+    <span class="help-text mt-1 text-xs">Salientes conectadas en este mes</span>
+  </div>
+  <div class="metric-card card">
+    <span class="card-label">Duración Promedio Conversación</span>
+    <span class="card-count">3m 42s</span>
+    <span class="help-text mt-1 text-xs">Excluye tonos de marcación</span>
+  </div>
+  <div class="metric-card card">
+    <span class="card-label">SMS Totales Enviados</span>
+    <span class="card-count">4,260</span>
+    <span class="help-text mt-1 text-xs">Por campañas y manuales</span>
+  </div>
+  <div class="metric-card card">
+    <span class="card-label font-semibold">Tasa de Conversión General</span>
+    <span class="card-count text-success">18.4%</span>
+    <span class="help-text mt-1 text-xs">Leads cerrados en póliza emitida</span>
+  </div>
+</div>
+
+<!-- GRAPHICAL REPORTS GRID -->
+<div class="reports-charts-grid">
+  <!-- Chart 1: Funnel bar chart -->
+  <div class="chart-card card">
+    <div class="chart-header">
+      <h3>Funnel de Conversión de Ventas</h3>
+      <p class="chart-subtitle">Volumen de leads promedio por cada etapa del pipeline</p>
+    </div>
+    <div class="canvas-wrapper">
+      <canvas #conversionChartCanvas></canvas>
+    </div>
+  </div>
+
+  <!-- Chart 2: Campaigns breakdown doughnut -->
+  <div class="chart-card card">
+    <div class="chart-header">
+      <h3>Leads recibidos por Fuentes de Tráfico</h3>
+    </div>
+    <div class="canvas-wrapper doughnut">
+      <canvas #campaignChartCanvas></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS TOAST FOR EXPORT -->
+<div class="toast success-toast" *ngIf="showToast()">
+  <div class="toast-indicator"></div>
+  <div class="toast-body">
+    <h4>Operación Exitosa</h4>
+    <p>{{ toastMsg() }}</p>
+  </div>
+</div>

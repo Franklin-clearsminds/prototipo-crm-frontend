@@ -1,0 +1,230 @@
+$sidebar-bg: #0f172a;
+$sidebar-text: #94a3b8;
+$sidebar-text-hover: #ffffff;
+$sidebar-active-bg: #1e293b;
+$sidebar-active-border: #2563eb;
+
+.sidebar-container {
+  display: flex;
+  flex-direction: column;
+  background-color: $sidebar-bg;
+  width: 250px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease-in-out;
+  border-right: 1px solid #1e293b;
+  z-index: 1000;
+
+  &.collapsed {
+    width: 70px;
+    
+    .logo-text-group, .nav-label {
+      display: none;
+    }
+
+    .logo-wrapper {
+      justify-content: center;
+    }
+
+    .sidebar-nav ul li a {
+      justify-content: center;
+      padding: 0.8rem;
+    }
+
+    .logout-btn {
+      justify-content: center;
+      padding: 0.8rem;
+    }
+  }
+}
+
+.sidebar-header {
+  padding: 1.5rem 1.25rem;
+  border-bottom: 1px solid #1e293b;
+
+  .logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      color: $sidebar-active-border;
+      flex-shrink: 0;
+    }
+
+    .logo-text-group {
+      display: flex;
+      flex-direction: column;
+      
+      .logo-title {
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1.2rem;
+        line-height: 1.2;
+      }
+
+      .logo-subtitle {
+        color: $sidebar-text;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    }
+  }
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 1.5rem 0.75rem;
+  overflow-y: auto;
+
+  ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    li a {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 1rem;
+      color: $sidebar-text;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: all 0.2s ease-in-out;
+
+      .nav-icon {
+        width: 20px;
+        height: 20px;
+        stroke: currentColor;
+        fill: none;
+        flex-shrink: 0;
+      }
+
+      &:hover {
+        color: $sidebar-text-hover;
+        background-color: rgba(255, 255, 255, 0.03);
+      }
+
+      &.active {
+        color: #ffffff;
+        background-color: $sidebar-active-bg;
+        box-shadow: inset 4px 0 0 $sidebar-active-border;
+      }
+    }
+  }
+}
+
+.sidebar-footer {
+  padding: 1rem 0.75rem;
+  border-top: 1px solid #1e293b;
+
+  .logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.75rem 1rem;
+    color: #ef4444;
+    background: transparent;
+    border: none;
+    font-weight: 500;
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background-color: rgba(239, 68, 68, 0.08);
+    }
+  }
+}
+
+/* Mobile responsive navigation overrides */
+.mobile-toggle {
+  display: none;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-toggle {
+    display: block;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1100;
+    background: #0f172a;
+    color: #ffffff;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 990;
+  }
+
+  .sidebar-container {
+    position: fixed;
+    top: 0;
+    left: -260px;
+    width: 250px;
+    box-shadow: none;
+    transition: left 0.3s ease-in-out;
+    z-index: 1000;
+
+    &.mobile-open {
+      left: 0;
+      box-shadow: 10px 0 15px -3px rgba(0, 0, 0, 0.3);
+    }
+    
+    // Disable normal collapse on mobile
+    &.collapsed {
+      width: 250px;
+      .logo-text-group, .nav-label {
+        display: flex;
+      }
+      .logo-wrapper {
+        justify-content: flex-start;
+      }
+      .sidebar-nav ul li a {
+        justify-content: flex-start;
+        padding: 0.75rem 1rem;
+      }
+      .logout-btn {
+        justify-content: flex-start;
+        padding: 0.75rem 1rem;
+      }
+    }
+  }
+}

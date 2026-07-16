@@ -1,0 +1,141 @@
+<div class="dialer-wrapper" *ngIf="activeCall">
+  <div class="dialer-header">
+    <div class="header-left">
+      <div class="pulse-indicator" [class.connected]="activeCall.isConnected"></div>
+      <span class="status-text">{{ activeCall.isConnected ? 'Llamada Activa' : 'Marcando...' }}</span>
+    </div>
+    <button class="close-btn" (click)="cancelCall()">&times;</button>
+  </div>
+
+  <div class="dialer-body">
+    <!-- Contact Info -->
+    <div class="contact-card">
+      <div class="avatar-circle">
+        {{ activeCall.lead.name.charAt(0) }}
+      </div>
+      <h3>{{ activeCall.lead.name }}</h3>
+      <p class="phone-label">{{ activeCall.phoneNumber }}</p>
+      <p class="line-label">Vía línea local: <strong>{{ activeCall.lineName }} ({{ activeCall.lead.state }})</strong></p>
+    </div>
+
+    <!-- Timer / Ringing -->
+    <div class="timer-display">
+      <span class="timer" *ngIf="activeCall.isConnected">{{ formatDuration(activeCall.durationSeconds) }}</span>
+      <span class="ringing-text" *ngIf="!activeCall.isConnected">Conectando con cliente...</span>
+    </div>
+
+    <!-- Keypad Overlay toggle -->
+    <div class="keypad-panel" *ngIf="showKeypad()">
+      <div class="keypad-display">{{ keypadDigits() || 'Presione un número' }}</div>
+      <div class="keypad-grid">
+        <button (click)="pressKey('1')">1</button>
+        <button (click)="pressKey('2')">2</button>
+        <button (click)="pressKey('3')">3</button>
+        <button (click)="pressKey('4')">4</button>
+        <button (click)="pressKey('5')">5</button>
+        <button (click)="pressKey('6')">6</button>
+        <button (click)="pressKey('7')">7</button>
+        <button (click)="pressKey('8')">8</button>
+        <button (click)="pressKey('9')">9</button>
+        <button (click)="pressKey('*')">*</button>
+        <button (click)="pressKey('0')">0</button>
+        <button (click)="pressKey('#')">#</button>
+      </div>
+      <button class="btn btn-secondary w-full mt-2" (click)="clearDigits()">Limpiar</button>
+    </div>
+
+    <!-- Call Controls -->
+    <div class="controls-row" *ngIf="!activeCall.isConnected || activeCall.timerInterval">
+      <!-- Active calling controls -->
+      <button class="ctrl-btn" [class.active]="activeCall.isMuted" (click)="toggleMute()" title="Silenciar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic-off"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12"/><path d="M17 11.3A6 6 0 0 1 14 17v5"/><path d="M12 2v4"/><path d="M19 11c0 .56-.08 1.1-.22 1.62"/><path d="M3 11a7 7 0 0 0 12 4.9"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+      </button>
+
+      <button class="ctrl-btn" (click)="showKeypad.set(!showKeypad())" title="Teclado">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grid"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+      </button>
+
+      <button class="ctrl-btn hangup" (click)="endCall()" title="Colgar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone-off"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-5.65-5.65A19.79 19.79 0 0 1 2 2.18 2 2 0 0 1 4 0h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="22" y1="2" x2="2" y2="22"/></svg>
+      </button>
+    </div>
+
+    <!-- Outcome Logging form (shown when call finishes but dialer is still active to submit logs) -->
+    <div class="outcome-form-panel" *ngIf="activeCall.isConnected && !activeCall.timerInterval">
+      <h4>Registrar Resultado de Llamada</h4>
+      <form [formGroup]="outcomeForm" (ngSubmit)="submitOutcome()">
+        <div class="form-group mt-2">
+          <label>Resultado *</label>
+          <select class="form-control" formControlName="outcome">
+            <option value="">Seleccione un resultado</option>
+            <option *ngFor="let out of outcomes" [value]="out">{{ out }}</option>
+          </select>
+          <span class="form-error" *ngIf="outcomeForm.get('outcome')?.touched && outcomeForm.get('outcome')?.invalid">
+            Este campo es requerido
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Notas adicionales</label>
+          <textarea class="form-control" formControlName="notes" placeholder="Escriba notas sobre la conversación..." rows="2"></textarea>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-secondary mr-2" (click)="cancelCall()">Descartar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="outcomeForm.invalid">Guardar Log</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- PHONE LINE SELECTOR MODAL -->
+<div class="modal-backdrop animate-fade" *ngIf="callService.showLineSelector()" (click)="cancelSelection()">
+  <div class="modal-content select-line-modal animate-slide-up" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Seleccionar Línea Telefónica</h2>
+      <button class="modal-close" (click)="cancelSelection()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="select-line-desc">
+        Estás marcando a <strong>{{ callService.pendingLead()?.name }}</strong> ubicado en <strong>{{ callService.pendingLead()?.state }}</strong>.
+        Seleccione la línea de salida que desea utilizar. Se destacan las recomendaciones de presencia local (mismo estado o estados colindantes):
+      </p>
+
+      <div class="lines-select-grid mt-4">
+        <div class="line-select-card" 
+             *ngFor="let line of getPhoneLines()" 
+             (click)="selectLineAndCall(line)"
+             [class.recommended]="getRecommendationReason(line, callService.pendingLead()?.state || '') !== ''">
+          
+          <div class="line-card-main">
+            <div class="line-number-info">
+              <strong class="text-md">{{ line.number }}</strong>
+              <span class="text-xs text-slate">{{ line.city }}, {{ line.state }} ({{ line.provider }})</span>
+            </div>
+            
+            <div class="recommend-tag" *ngIf="getRecommendationReason(line, callService.pendingLead()?.state || '') as reason">
+              <span class="badge-recommend">{{ reason }}</span>
+            </div>
+          </div>
+          
+          <div class="line-card-stats mt-3">
+            <div class="stat-item text-xs">
+              <span>Riesgo de Spam: </span>
+              <strong [class.text-danger]="line.spamRiskScore > 50" [class.text-success]="line.spamRiskScore < 20">
+                {{ line.spamRiskScore }}%
+              </strong>
+            </div>
+            <div class="stat-item text-xs text-slate">
+              <span>Llamadas/SMS: </span>
+              <strong>{{ line.callsCount }} / {{ line.messagesCount }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cancelSelection()">Cancelar</button>
+    </div>
+  </div>
+</div>

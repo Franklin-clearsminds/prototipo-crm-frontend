@@ -1,0 +1,206 @@
+<div class="page-header">
+  <div class="page-title">
+    <h1>{{ t('lines.title') }}</h1>
+    <div class="breadcrumb">
+      <span>InsureFlow</span>
+      <span class="separator"></span>
+      <span class="active">{{ t('menu.phoneLines') }}</span>
+    </div>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-primary" (click)="openAddModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+      {{ t('lines.buy') }}
+    </button>
+  </div>
+</div>
+
+<div class="phone-lines-layout">
+  <!-- LEFT: Coverage / Proximity rules cards -->
+  <div class="info-sidebar">
+    <!-- Proximity rules -->
+    <div class="proximity-card card">
+      <h3>Reglas de Proximidad Inteligente</h3>
+      <p class="description">El marcador enruta de forma automática las llamadas salientes utilizando prefijos regionales locales basados en la dirección física del prospecto, mejorando la tasa de contestación de llamadas.</p>
+      
+      <div class="rules-list mt-4">
+        <div class="rule-item" *ngFor="let rule of proximityRules">
+          <div class="rule-header">
+            <strong>{{ rule.state }}</strong>
+            <span class="arrow-right">&rarr;</span>
+            <span class="rule-proxy font-bold">{{ rule.proxyState }}</span>
+          </div>
+          <p class="rule-desc">{{ rule.desc }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carrier status info -->
+    <div class="carrier-card card mt-4">
+      <h3>Monitoreo Carrier (A2P 10DLC)</h3>
+      <p class="description">Estado de registro de campañas para enrutamiento seguro de mensajería comercial SMS a carriers de EE. UU. (Verizon, T-Mobile, AT&T).</p>
+      
+      <div class="carrier-status-row mt-4">
+        <span class="label">Twilio Brand Status:</span>
+        <span class="badge badge-available">Verificado</span>
+      </div>
+      <div class="carrier-status-row">
+        <span class="label">Telnyx Profile Registry:</span>
+        <span class="badge badge-available">Aprobado</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Lines Table list -->
+  <div class="table-content-area card">
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>{{ t('lines.col.number') }}</th>
+            <th>{{ t('lines.col.city') }}</th>
+            <th>{{ t('lines.col.provider') }}</th>
+            <th>{{ t('lines.col.status') }}</th>
+            <th>{{ t('lines.col.agent') }}</th>
+            <th>{{ t('lines.col.calls') }}</th>
+            <th>{{ t('lines.col.sms') }}</th>
+            <th>{{ t('lines.col.spam') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let line of lines()">
+            <td>
+              <div class="number-cell">
+                <strong>{{ line.number }}</strong>
+                <span>Prefijo Area Code: ({{ line.areaCode }})</span>
+              </div>
+            </td>
+            <td>
+              <div class="location-cell">
+                <strong>{{ line.city }}</strong>
+                <span class="state-badge-us">{{ line.state }}</span>
+              </div>
+            </td>
+            <td class="text-secondary text-sm">{{ line.provider }}</td>
+            <td>
+              <span class="badge" [class]="'badge-' + line.status">{{ line.status }}</span>
+            </td>
+            <td>
+              <div class="agent-assign-cell">
+                <span class="agent-name">{{ getAgentName(line.assignedAgentId) }}</span>
+                <button class="btn-edit" (click)="openAssignModal(line)" title="Asignar agente">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                </button>
+              </div>
+            </td>
+            <td>{{ line.callsCount }}</td>
+            <td>{{ line.messagesCount }}</td>
+            <td>
+              <div class="spam-meter-group">
+                <div class="spam-bar-wrapper">
+                  <div class="spam-bar-fill" [style.width.%]="line.spamRiskScore" [class.high-risk]="line.spamRiskScore > 70" [class.medium-risk]="line.spamRiskScore >= 40 && line.spamRiskScore <= 70"></div>
+                </div>
+                <span class="spam-value" [class.text-danger]="line.spamRiskScore > 70">{{ line.spamRiskScore }}%</span>
+              </div>
+            </td>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ADD LINE MODAL -->
+<div class="modal-backdrop" *ngIf="showAddModal()" (click)="closeAddModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Comprar Número Regional (SIMULADO)</h2>
+      <button class="modal-close" (click)="closeAddModal()">&times;</button>
+    </div>
+    
+    <form [formGroup]="lineForm" (ngSubmit)="submitLine()">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Número de teléfono *</label>
+          <input type="text" class="form-control" formControlName="number" placeholder="Ej. +1 (512) 555-0100">
+          <span class="form-error" *ngIf="lineForm.get('number')?.touched && lineForm.get('number')?.invalid">
+            Formato de número inválido. Debe iniciar con +1.
+          </span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col">
+            <label>Código de área *</label>
+            <input type="text" class="form-control" formControlName="areaCode" placeholder="512">
+            <span class="form-error" *ngIf="lineForm.get('areaCode')?.touched && lineForm.get('areaCode')?.invalid">
+              Requerido
+            </span>
+          </div>
+          <div class="form-group col">
+            <label>Estado de Residencia *</label>
+            <select class="form-control" formControlName="state">
+              <option value="">Seleccione estado</option>
+              <option *ngFor="let st of states" [value]="st">{{ st }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col">
+            <label>Ciudad *</label>
+            <input type="text" class="form-control" formControlName="city" placeholder="Austin">
+          </div>
+          <div class="form-group col">
+            <label>Proveedor Gateway</label>
+            <select class="form-control" formControlName="provider">
+              <option *ngFor="let pr of providers" [value]="pr">{{ pr }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeAddModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="lineForm.invalid">Comprar Número</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ASSIGN AGENT MODAL -->
+<div class="modal-backdrop" *ngIf="showAssignModal()" (click)="closeAssignModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Asignar Línea a Agente</h2>
+      <button class="modal-close" (click)="closeAssignModal()">&times;</button>
+    </div>
+    
+    <form [formGroup]="assignForm" (ngSubmit)="submitAssign()">
+      <div class="modal-body">
+        <p class="mb-4">Asigne el número <strong>{{ selectedLine()?.number }}</strong> ({{ selectedLine()?.city }}, {{ selectedLine()?.state }}) a un agente comercial:</p>
+        
+        <div class="form-group">
+          <label>Agente Responsable</label>
+          <select class="form-control" formControlName="agentId">
+            <option value="">Ninguno (Liberar número)</option>
+            <option *ngFor="let ag of agents()" [value]="ag.id">{{ ag.firstName }} {{ ag.lastName }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeAssignModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- SUCCESS TOAST -->
+<div class="toast success-toast" *ngIf="showSuccessToast()">
+  <div class="toast-indicator"></div>
+  <div class="toast-body">
+    <h4>Operación Exitosa</h4>
+    <p>{{ toastMessage() }}</p>
+  </div>
+</div>

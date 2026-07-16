@@ -1,0 +1,86 @@
+<div class="page-header">
+  <div class="page-title">
+    <h1>{{ t('pipe.title') }}</h1>
+    <div class="breadcrumb">
+      <span>InsureFlow</span>
+      <span class="separator"></span>
+      <span class="active">{{ t('menu.pipeline') }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="kanban-filters card">
+  <div class="filters-row">
+    <div class="filter-group">
+      <label>Filtrar por Agente</label>
+      <select class="form-control" [ngModel]="filterAgent()" (ngModelChange)="filterAgent.set($event)">
+        <option value="">Todos los agentes</option>
+        <option *ngFor="let ag of agentsList()" [value]="ag.id">{{ ag.firstName }} {{ ag.lastName }}</option>
+      </select>
+    </div>
+    
+    <div class="filter-group">
+      <label>Filtrar por Campaña</label>
+      <select class="form-control" [ngModel]="filterCampaign()" (ngModelChange)="filterCampaign.set($event)">
+        <option value="">Todas las campañas</option>
+        <option *ngFor="let cp of campaignsList()" [value]="cp.id">{{ cp.name }}</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- KANBAN BOARD CONTAINER -->
+<div class="kanban-board-wrapper">
+  <div class="kanban-board">
+    <!-- Loop through status columns -->
+    <div class="kanban-column" 
+         *ngFor="let col of columns" 
+         [class]="col.class"
+         (dragover)="onDragOver($event)" 
+         (drop)="onDrop($event, col.id)">
+      
+      <!-- Column Header -->
+      <div class="column-header">
+        <h3>{{ t('pipe.col.' + col.id) }}</h3>
+        <span class="count-badge">{{ kanbanData()[col.id].length }}</span>
+      </div>
+
+      <!-- Column Card drop-zone list -->
+      <div class="cards-list">
+        <!-- Loop leads inside column -->
+        <div class="kanban-card card card-hover" 
+             *ngFor="let lead of kanbanData()[col.id]"
+             draggable="true"
+             (dragstart)="onDragStart($event, lead.id)"
+             (click)="openLeadDetail(lead.id)">
+          
+          <div class="card-header-row">
+            <h4>{{ lead.name }}</h4>
+            <span class="state-indicator">{{ lead.state }}</span>
+          </div>
+
+          <p class="phone-label">{{ lead.phone }}</p>
+          <p class="interest-label">{{ lead.interest }}</p>
+
+          <div class="card-footer-row">
+            <div class="agent-avatar-mini" [title]="getAgentName(lead.assignedAgentId)">
+              <!-- Initials avatar -->
+              <span>{{ getAgentName(lead.assignedAgentId).charAt(0) }}</span>
+            </div>
+            
+            <!-- Quick Dial Call trigger -->
+            <button class="call-trigger-btn" (click)="startCall(lead, $event)" title="Llamar">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Empty state placeholder card -->
+        <div class="column-empty-placeholder" *ngIf="kanbanData()[col.id].length === 0">
+          Arrastre leads aquí
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

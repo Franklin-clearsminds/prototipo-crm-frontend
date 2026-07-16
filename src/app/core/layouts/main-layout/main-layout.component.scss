@@ -1,0 +1,30 @@
+.layout-wrapper {
+  display: flex;
+  width: 100vw;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.main-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100vh;
+  overflow: hidden;
+  transition: padding-left 0.3s ease-in-out;
+  background-color: #f8fafc;
+}
+
+.page-content-area {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .page-content-area {
+    padding: 1.25rem 1rem;
+    padding-top: 4.5rem; // space for floating menu toggle in mobile
+  }
+}

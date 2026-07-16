@@ -1,0 +1,56 @@
+<div class="page-header">
+  <div class="page-title">
+    <h1>{{ t('calls.title') }}</h1>
+    <div class="breadcrumb">
+      <span>InsureFlow</span>
+      <span class="separator"></span>
+      <span class="active">{{ t('menu.calls') }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="table-container card">
+  <div class="table-responsive">
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th>{{ t('calls.col.lead') }}</th>
+          <th>{{ t('calls.col.phone') }}</th>
+          <th>{{ t('calls.col.location') }}</th>
+          <th>{{ t('calls.col.agent') }}</th>
+          <th>{{ t('calls.col.duration') }}</th>
+          <th>{{ t('calls.col.outcome') }}</th>
+          <th>{{ t('calls.col.notes') }}</th>
+          <th>{{ t('calls.col.date') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let call of history()">
+          <td><strong>{{ call.leadName }}</strong></td>
+          <td class="text-secondary text-sm">{{ call.phoneNumber }}</td>
+          <td>
+            <span class="direction-badge" [class.incoming]="call.direction === 'incoming'">
+              {{ call.direction === 'incoming' ? 'Entrante' : 'Saliente' }}
+            </span>
+          </td>
+          <td class="font-semibold text-sm">{{ call.agentName }}</td>
+          <td class="text-secondary">{{ formatDuration(call.durationSeconds) }}</td>
+          <td>
+            <span class="outcome-badge">{{ call.outcome }}</span>
+          </td>
+          <td class="text-secondary text-sm italic">{{ call.notes || 'Sin notas registradas.' }}</td>
+          <td class="text-secondary text-sm">{{ call.createdAt | date:'medium' }}</td>
+        </tr>
+        <tr *ngIf="history().length === 0">
+          <td colspan="8" class="empty-cell">
+            <div class="empty-calls-state">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <h3>No hay registros de llamadas</h3>
+              <p>Las llamadas simuladas iniciadas desde las fichas de leads se registrarán en esta vista histórica.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,194 @@
+<div class="page-header">
+  <div class="page-title">
+    <h1>{{ t('set.title') }}</h1>
+    <div class="breadcrumb">
+      <span>InsureFlow</span>
+      <span class="separator"></span>
+      <span class="active">{{ t('menu.settings') }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="settings-layout">
+  <!-- LEFT: Tabs Sidebar Navigation -->
+  <aside class="settings-tabs-sidebar card">
+    <ul>
+      <li>
+        <button [class.active]="activeTab() === 'profile'" (click)="setTab('profile')">
+          Mi Perfil
+        </button>
+      </li>
+      <li>
+        <button [class.active]="activeTab() === 'general'" (click)="setTab('general')">
+          Datos de la Empresa
+        </button>
+      </li>
+      <li>
+        <button [class.active]="activeTab() === 'routing'" (click)="setTab('routing')">
+          Reglas de Asignación
+        </button>
+      </li>
+      <li>
+        <button [class.active]="activeTab() === 'templates'" (click)="setTab('templates')">
+          Plantillas de Mensajes
+        </button>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- RIGHT: Config Content panel -->
+  <div class="settings-content card">
+    <!-- TAB 0: Personal Profile settings -->
+    <div class="settings-pane" *ngIf="activeTab() === 'profile'">
+      <h3>{{ t('header.profileSettings') }}</h3>
+      <p class="section-desc">Gestiona tus datos personales de acceso y presentación dentro del CRM.</p>
+      
+      <form class="mt-4" (ngSubmit)="saveProfile()">
+        <div class="form-group">
+          <label>Nombre Completo</label>
+          <input type="text" class="form-control" [ngModel]="profileName()" (ngModelChange)="profileName.set($event)" name="profileName" required>
+        </div>
+
+        <div class="form-group">
+          <label>Correo Electrónico</label>
+          <input type="email" class="form-control" [ngModel]="profileEmail()" (ngModelChange)="profileEmail.set($event)" name="profileEmail" required>
+        </div>
+
+        <div class="form-group">
+          <label>Nueva Contraseña</label>
+          <input type="password" class="form-control" [ngModel]="profilePassword()" (ngModelChange)="profilePassword.set($event)" name="profilePassword">
+          <small class="form-text text-muted">Deje la contraseña predeterminada para no realizar cambios.</small>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col">
+            <label>Rol asignado</label>
+            <input type="text" class="form-control" [value]="authService.currentUser()?.role === 'admin' ? 'Administrador' : 'Agente'" disabled>
+          </div>
+          <div class="form-group col">
+            <label>Avatar / Foto</label>
+            <div class="avatar-preview-container">
+              <img [src]="authService.currentUser()?.avatarUrl" class="settings-avatar" alt="Avatar">
+              <span class="text-xs text-muted ml-2">Foto sincronizada de la cuenta</span>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-4">Guardar Perfil</button>
+      </form>
+    </div>
+
+    <!-- TAB 1: General Profile settings -->
+    <div class="settings-pane" *ngIf="activeTab() === 'general'">
+      <h3>Información de la Organización</h3>
+      <p class="section-desc">Datos generales del CRM y configuraciones corporativas para el envío de propuestas.</p>
+      
+      <form class="mt-4" (ngSubmit)="saveGeneral()">
+        <div class="form-group">
+          <label>Nombre de la Empresa</label>
+          <input type="text" class="form-control" [ngModel]="companyName()" (ngModelChange)="companyName.set($event)" name="companyName">
+        </div>
+
+        <div class="form-group">
+          <label>Correo Electrónico de Operaciones</label>
+          <input type="email" class="form-control" [ngModel]="companyEmail()" (ngModelChange)="companyEmail.set($event)" name="companyEmail">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col">
+            <label>Zona Horaria Corporativa</label>
+            <select class="form-control" [ngModel]="officeTimezone()" (ngModelChange)="officeTimezone.set($event)" name="timezone">
+              <option value="EST (New York)">EST (New York)</option>
+              <option value="CST (Chicago)">CST (Chicago)</option>
+              <option value="MST (Denver)">MST (Denver)</option>
+              <option value="PST (Los Angeles)">PST (Los Angeles)</option>
+            </select>
+          </div>
+          <div class="form-group col">
+            <label>Límite Marcación por Lead (Dials)</label>
+            <input type="number" class="form-control" [ngModel]="dialLimit()" (ngModelChange)="dialLimit.set($event)" name="dialLimit">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-2">Guardar Perfil Organizativo</button>
+      </form>
+    </div>
+
+    <!-- TAB 2: Routing allocation rules -->
+    <div class="settings-pane" *ngIf="activeTab() === 'routing'">
+      <h3>Reglas de Distribución de Leads</h3>
+      <p class="section-desc">Regule cómo se asignan los leads entrantes de campañas digitales a los agentes comerciales.</p>
+
+      <form class="mt-4" (ngSubmit)="saveRouting()">
+        <div class="form-group">
+          <label>Estrategia de Enrutamiento</label>
+          <select class="form-control" [ngModel]="routingStrategy()" (ngModelChange)="routingStrategy.set($event)" name="strategy">
+            <option value="round_robin">Round-Robin (Asignación rotativa equitativa)</option>
+            <option value="territory">Territory Mapping (Asignación por estado geográfico)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [ngModel]="excludeWeekend()" (ngModelChange)="excludeWeekend.set($event)" name="exclude">
+            <span>Pausar asignaciones los fines de semana ( Leads quedan en cola 'Nuevos' )</span>
+          </label>
+        </div>
+
+        <div class="form-group mt-4">
+          <label>Edad Mínima del Prospecto para Calificación</label>
+          <input type="number" class="form-control" style="width: 120px;" [ngModel]="minAgeLimit()" (ngModelChange)="minAgeLimit.set($event)" name="minAge">
+          <p class="help-text mt-1 text-xs">Leads por debajo de este límite se descartan de forma automática.</p>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-2">Guardar Reglas</button>
+      </form>
+    </div>
+
+    <!-- TAB 3: Message templates registration -->
+    <div class="settings-pane" *ngIf="activeTab() === 'templates'">
+      <h3>Plantillas de Mensajes SMS</h3>
+      <p class="section-desc">Configure respuestas rápidas precargadas utilizables en los drawers y centro de mensajería.</p>
+
+      <!-- Templates table list -->
+      <div class="templates-table mt-4">
+        <div class="template-row-item" *ngFor="let temp of templates; let i = index">
+          <div class="temp-header">
+            <strong>{{ temp.name }}</strong>
+            <button class="delete-btn" (click)="deleteTemplate(i)">&times; Eliminar</button>
+          </div>
+          <p class="temp-text">{{ temp.text }}</p>
+        </div>
+      </div>
+
+      <!-- Add template card -->
+      <div class="add-template-card mt-6">
+        <h4>Agregar Nueva Plantilla</h4>
+        <form (ngSubmit)="addTemplate()">
+          <div class="form-group mt-2">
+            <label>Nombre de la Plantilla</label>
+            <input type="text" class="form-control" placeholder="Ej. Confirmación de Cita" [ngModel]="newTemplateName()" (ngModelChange)="newTemplateName.set($event)" name="tempName">
+          </div>
+          
+          <div class="form-group">
+            <label>Contenido SMS (Utilice [Nombre] para autocompletar el nombre del cliente)</label>
+            <textarea class="form-control" placeholder="Hola [Nombre], te hablo de..." rows="3" [ngModel]="newTemplateText()" (ngModelChange)="newTemplateText.set($event)" name="tempText"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-sm" [disabled]="!newTemplateName() || !newTemplateText()">
+            Añadir Plantilla
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONFIG -->
+<div class="toast success-toast" *ngIf="showToast()">
+  <div class="toast-indicator"></div>
+  <div class="toast-body">
+    <h4>Configuración Actualizada</h4>
+    <p>{{ toastMsg() }}</p>
+  </div>
+</div>

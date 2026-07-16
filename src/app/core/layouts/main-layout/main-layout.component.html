@@ -1,0 +1,15 @@
+<div class="layout-wrapper">
+  <!-- Collapsible Sidebar component -->
+  <app-sidebar></app-sidebar>
+
+  <!-- Main content wrapper -->
+  <div class="main-content-wrapper" [class.sidebar-collapsed]="isSidebarCollapsed">
+    <!-- Top Header component -->
+    <app-header (toggleSidebar)="toggleSidebar()"></app-header>
+
+    <!-- Main dynamic route outlet wrapper -->
+    <main class="page-content-area">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

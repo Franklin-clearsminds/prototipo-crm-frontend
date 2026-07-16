@@ -1,0 +1,121 @@
+<div class="page-header" *ngIf="agent()">
+  <div class="page-title">
+    <div class="back-link">
+      <a routerLink="/agents">&larr; Volver a Agentes</a>
+    </div>
+    <h1>Perfil del Agente: {{ agent()?.firstName }} {{ agent()?.lastName }}</h1>
+    <div class="breadcrumb">
+      <span>InsureFlow</span>
+      <span class="separator"></span>
+      <span>Agentes</span>
+      <span class="separator"></span>
+      <span class="active">{{ agent()?.firstName }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="agent-detail-grid" *ngIf="agent()">
+  <!-- LEFT PROFILE COLUMN -->
+  <div class="profile-card-column">
+    <div class="agent-profile-card card">
+      <img class="profile-avatar" [src]="agent()?.avatarUrl" alt="Avatar">
+      <h2>{{ agent()?.firstName }} {{ agent()?.lastName }}</h2>
+      <p class="email-label">{{ agent()?.email }}</p>
+      
+      <div class="agent-profile-details mt-4">
+        <div class="detail-row">
+          <span class="label">Teléfono:</span>
+          <span class="value">{{ agent()?.phone }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Zona horaria:</span>
+          <span class="value">{{ agent()?.timezone }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Estado actual:</span>
+          <span class="value">
+            <span class="agent-status-badge" [class]="agent()!.status">
+              {{ agent()?.status }}
+            </span>
+          </span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Estados asignados:</span>
+          <div class="badges-row justify-end">
+            <span class="state-mini-badge" *ngFor="let st of agent()?.assignedStates">{{ st }}</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <span class="label">Líneas telefónicas:</span>
+          <span class="value">{{ agent()?.assignedPhoneLines?.join(', ') || 'Ninguna' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PERFORMANCE COLUMN -->
+  <div class="performance-column">
+    <!-- KPIs mini-grid -->
+    <div class="kpis-mini-grid">
+      <div class="kpi-card card">
+        <span class="kpi-title">Leads Asignados</span>
+        <span class="kpi-value">{{ agent()?.leadsCount }}</span>
+      </div>
+      <div class="kpi-card card">
+        <span class="kpi-title">Tasa de Conversión</span>
+        <span class="kpi-value text-success">{{ conversionRate() }}%</span>
+      </div>
+      <div class="kpi-card card">
+        <span class="kpi-title">Tiempo de Respuesta</span>
+        <span class="kpi-value text-indigo">{{ avgResponseTime() }}</span>
+      </div>
+      <div class="kpi-card card">
+        <span class="kpi-title">Ventas Cerradas</span>
+        <span class="kpi-value text-success">{{ agent()?.salesCount }}</span>
+      </div>
+    </div>
+
+    <!-- Assigned Leads List -->
+    <div class="assigned-leads-card card mt-6">
+      <h3>Leads Asignados a este Agente</h3>
+      
+      <div class="table-responsive mt-2">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Estado</th>
+              <th>Interés</th>
+              <th>Estado lead</th>
+              <th>Fecha ingreso</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let lead of assignedLeads()" [routerLink]="['/leads', lead.id]" class="clickable-row">
+              <td><strong>{{ lead.name }}</strong></td>
+              <td><span class="state-badge-us">{{ lead.state }}</span></td>
+              <td class="text-sm text-secondary">{{ lead.interest }}</td>
+              <td>
+                <span class="status-badge-inline" [class]="lead.status">{{ lead.status }}</span>
+              </td>
+              <td class="text-sm text-secondary">{{ lead.createdAt | date:'shortDate' }}</td>
+            </tr>
+            <tr *ngIf="assignedLeads().length === 0">
+              <td colspan="5" class="empty-cell">
+                No hay leads asignados a este agente comercial.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REDIRECT NOT FOUND STATE -->
+<div class="not-found-card card" *ngIf="!agent()">
+  <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  <h2>Agente no encontrado</h2>
+  <p>El código de agente consultado no se encuentra registrado en el sistema.</p>
+  <button class="btn btn-primary mt-4" routerLink="/agents">Volver a Agentes</button>
+</div>

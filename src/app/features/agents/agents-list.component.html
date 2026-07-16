@@ -1,0 +1,168 @@
+<div class="page-header">
+  <div class="page-title">
+    <h1>{{ t('agents.title') }}</h1>
+    <div class="breadcrumb">
+      <span>InsureFlow</span>
+      <span class="separator"></span>
+      <span class="active">{{ t('menu.agents') }}</span>
+    </div>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-primary" (click)="openDrawer()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+      {{ t('agents.register') }}
+    </button>
+  </div>
+</div>
+
+<!-- AGENTS TABLE VIEW -->
+<div class="table-container card">
+  <div class="table-responsive">
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th>{{ t('agents.col.profile') }}</th>
+          <th>{{ t('agents.col.email') }}</th>
+          <th>{{ t('agents.col.status') }}</th>
+          <th>{{ t('agents.col.leads') }}</th>
+          <th>{{ t('agents.col.contacted') }}</th>
+          <th>{{ t('agents.col.appointments') }}</th>
+          <th>{{ t('agents.col.sales') }}</th>
+          <th>{{ t('agents.col.states') }}</th>
+          <th>{{ t('agents.col.lines') }}</th>
+          <th class="actions-col">{{ t('agents.col.actions') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let agent of agents()">
+          <td>
+            <div class="agent-profile-cell">
+              <img class="agent-avatar" [src]="agent.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'" alt="Avatar">
+              <div class="agent-meta">
+                <strong>{{ agent.firstName }} {{ agent.lastName }}</strong>
+                <span>{{ agent.timezone }}</span>
+              </div>
+            </div>
+          </td>
+          <td class="text-secondary text-sm">{{ agent.email }}</td>
+          <td>
+            <span class="agent-status-badge" [class]="agent.status">
+              {{ agent.status === 'active' ? 'Activo' : agent.status === 'busy' ? 'Ocupado' : 'Inactivo' }}
+            </span>
+          </td>
+          <td><strong>{{ agent.leadsCount }}</strong></td>
+          <td>{{ agent.contactedCount }}</td>
+          <td><span class="text-indigo font-bold">{{ agent.appointmentsCount }}</span></td>
+          <td><span class="text-success font-bold">{{ agent.salesCount }}</span></td>
+          <td>
+            <div class="badges-row">
+              <span class="state-mini-badge" *ngFor="let st of agent.assignedStates">{{ st }}</span>
+            </div>
+          </td>
+          <td class="text-secondary text-sm">
+            {{ agent.assignedPhoneLines.join(', ') || 'Sin líneas asignadas' }}
+          </td>
+          <td>
+            <a class="btn btn-secondary btn-sm" [routerLink]="['/agents', agent.id]">
+              Detalle &rarr;
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CREATE AGENT SLIDE OVER DRAWER -->
+<div class="modal-backdrop" *ngIf="showCreateDrawer()" (click)="closeDrawer()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Registrar Nuevo Agente</h2>
+      <button class="modal-close" (click)="closeDrawer()">&times;</button>
+    </div>
+    
+    <form [formGroup]="agentForm" (ngSubmit)="submitAgent()">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group col">
+            <label>Nombre *</label>
+            <input type="text" class="form-control" formControlName="firstName" placeholder="Sarah">
+            <span class="form-error" *ngIf="agentForm.get('firstName')?.touched && agentForm.get('firstName')?.invalid">
+              Requerido
+            </span>
+          </div>
+          <div class="form-group col">
+            <label>Apellido *</label>
+            <input type="text" class="form-control" formControlName="lastName" placeholder="Jenkins">
+            <span class="form-error" *ngIf="agentForm.get('lastName')?.touched && agentForm.get('lastName')?.invalid">
+              Requerido
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Correo Institucional *</label>
+          <input type="email" class="form-control" formControlName="email" placeholder="sarah.jenkins@insureflow.com">
+          <span class="form-error" *ngIf="agentForm.get('email')?.touched && agentForm.get('email')?.invalid">
+            Ingrese un correo válido
+          </span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col">
+            <label>Teléfono *</label>
+            <input type="text" class="form-control" formControlName="phone" placeholder="+1 (555) 012-3456">
+            <span class="form-error" *ngIf="agentForm.get('phone')?.touched && agentForm.get('phone')?.invalid">
+              Requerido
+            </span>
+          </div>
+          <div class="form-group col">
+            <label>Zona Horaria *</label>
+            <select class="form-control" formControlName="timezone">
+              <option *ngFor="let tz of timezones" [value]="tz">{{ tz }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- States Grid checkboxes -->
+        <div class="form-group">
+          <label>Estados Asignados (EE. UU.) *</label>
+          <div class="checkbox-badge-grid">
+            <button type="button" 
+                    *ngFor="let st of states" 
+                    class="checkbox-badge-btn" 
+                    [class.selected]="isStateSelected(st)"
+                    (click)="toggleStateSelection(st)">
+              {{ st }}
+            </button>
+          </div>
+          <span class="form-error" *ngIf="agentForm.get('assignedStates')?.touched && agentForm.get('assignedStates')?.invalid">
+            Seleccione al menos un estado
+          </span>
+        </div>
+
+        <!-- Phone Lines selection -->
+        <div class="form-group">
+          <label>Líneas Telefónicas Disponibles</label>
+          <div class="lines-select-grid">
+            <ng-container *ngFor="let line of phoneLines()">
+              <button type="button" 
+                      *ngIf="!line.assignedAgentId"
+                      class="line-badge-btn" 
+                      [class.selected]="isLineSelected(line.number)"
+                      (click)="toggleLineSelection(line.number)">
+                {{ line.number }} ({{ line.state }})
+              </button>
+            </ng-container>
+          </div>
+          <p class="help-text mt-1 text-xs">Muestra solo líneas físicas virtuales actualmente disponibles sin agente asignado.</p>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeDrawer()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="agentForm.invalid">Crear Agente</button>
+      </div>
+    </form>
+  </div>
+</div>

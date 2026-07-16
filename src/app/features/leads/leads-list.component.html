@@ -1,0 +1,438 @@
+<div class="page-header">
+  <div class="page-title">
+    <h1>{{ t('leads.title') }}</h1>
+    <div class="breadcrumb">
+      <span>InsureFlow</span>
+      <span class="separator"></span>
+      <span class="active">{{ t('menu.leads') }}</span>
+    </div>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-secondary mr-2" (click)="resetFilters()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M16 3h5v5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 21H3v-5"/></svg>
+      {{ t('leads.cleanFilters') }}
+    </button>
+    <button class="btn btn-primary" (click)="openAutoAssign()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6h6"/><path d="M21 2v6h-6"/></svg>
+      {{ t('leads.autoAssign') }}
+    </button>
+  </div>
+</div>
+
+<!-- FILTER BAR TRAY -->
+<div class="filter-tray card">
+  <div class="filter-grid">
+    <!-- Search Query -->
+    <div class="filter-col">
+      <label>Buscar</label>
+      <input type="text" class="form-control" placeholder="Nombre o teléfono..." [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event); currentPage.set(1)">
+    </div>
+
+    <!-- Status -->
+    <div class="filter-col">
+      <label>Estado de lead</label>
+      <select class="form-control" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event); currentPage.set(1)">
+        <option value="">Todos</option>
+        <option *ngFor="let st of statusList" [value]="st.value">{{ st.label }}</option>
+      </select>
+    </div>
+
+    <!-- Agent -->
+    <div class="filter-col">
+      <label>Agente responsable</label>
+      <select class="form-control" [ngModel]="filterAgent()" (ngModelChange)="filterAgent.set($event); currentPage.set(1)">
+        <option value="">Todos</option>
+        <option *ngFor="let ag of agentsList()" [value]="ag.id">{{ ag.firstName }} {{ ag.lastName }}</option>
+      </select>
+    </div>
+
+    <!-- State -->
+    <div class="filter-col">
+      <label>Estado EE. UU.</label>
+      <select class="form-control" [ngModel]="filterState()" (ngModelChange)="filterState.set($event); currentPage.set(1)">
+        <option value="">Todos</option>
+        <option *ngFor="let st of states" [value]="st">{{ st }}</option>
+      </select>
+    </div>
+
+    <!-- Campaign -->
+    <div class="filter-col">
+      <label>Campaña origen</label>
+      <select class="form-control" [ngModel]="filterCampaign()" (ngModelChange)="filterCampaign.set($event); currentPage.set(1)">
+        <option value="">Todas</option>
+        <option *ngFor="let cp of campaignsList()" [value]="cp.id">{{ cp.name }}</option>
+      </select>
+    </div>
+
+    <!-- Interest -->
+    <div class="filter-col">
+      <label>Interés</label>
+      <select class="form-control" [ngModel]="filterInterest()" (ngModelChange)="filterInterest.set($event); currentPage.set(1)">
+        <option value="">Todos</option>
+        <option *ngFor="let ins of interests" [value]="ins">{{ ins }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="filter-row-bottom">
+    <label class="toggle-uncontacted">
+      <input type="checkbox" [ngModel]="filterUncontacted()" (ngModelChange)="filterUncontacted.set($event); currentPage.set(1)">
+      <span>Mostrar solo leads sin contactar</span>
+    </label>
+    
+    <div class="results-info">
+      Mostrando <strong>{{ filteredLeads().length }}</strong> leads encontrados
+    </div>
+  </div>
+</div>
+
+<!-- BULK SELECTION ACTION BANNER -->
+<div class="bulk-action-banner" *ngIf="selectedLeadIds().length > 0">
+  <div class="banner-text">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <span><strong>{{ selectedLeadIds().length }}</strong> leads seleccionados</span>
+  </div>
+  <div class="banner-actions">
+    <button class="btn btn-primary" (click)="openBulkAssign()">Asignar Agente Masivo</button>
+    <button class="btn btn-secondary text-white" (click)="selectedLeadIds.set([])">Cancelar</button>
+  </div>
+</div>
+
+<!-- LEADS TABLE VIEW -->
+<div class="table-container card">
+  <div class="table-responsive">
+    <table class="table-custom">
+      <thead>
+        <tr>
+          <th class="checkbox-col">
+            <input type="checkbox" [checked]="isAllPageSelected()" (change)="toggleSelectAll()">
+          </th>
+          <th (click)="setSort('name')" class="sortable">
+            {{ t('leads.col.name') }} 
+            <span *ngIf="sortBy() === 'name'">{{ sortDirection() === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th>{{ t('leads.col.phone') }}</th>
+          <th>{{ t('leads.col.state') }}</th>
+          <th>{{ t('leads.col.age') }}</th>
+          <th>{{ t('leads.col.interest') }}</th>
+          <th>{{ t('leads.col.status') }}</th>
+          <th>{{ t('leads.col.agent') }}</th>
+          <th (click)="setSort('date')" class="sortable">
+            {{ t('leads.col.created') }}
+            <span *ngIf="sortBy() === 'date'">{{ sortDirection() === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th>{{ t('leads.col.noContact') }}</th>
+          <th class="actions-col">{{ t('leads.col.actions') }}</th>
+        </tr>
+      </thead>
+
+      <!-- SKELETON LOADER ROWS -->
+      <tbody *ngIf="isLoading()">
+        <tr *ngFor="let item of [1,2,3,4,5]">
+          <td><div class="skeleton skeleton-avatar"></div></td>
+          <td><div class="skeleton skeleton-text" style="width: 120px;"></div></td>
+          <td><div class="skeleton skeleton-text" style="width: 100px;"></div></td>
+          <td><div class="skeleton skeleton-text" style="width: 30px;"></div></td>
+          <td><div class="skeleton skeleton-text" style="width: 25px;"></div></td>
+          <td><div class="skeleton skeleton-text" style="width: 110px;"></div></td>
+          <td><div class="skeleton skeleton-text" style="width: 80px;"></div></td>
+          <td><div class="skeleton skeleton-text" style="width: 100px;"></div></td>
+          <td><div class="skeleton skeleton-text" style="width: 80px;"></div></td>
+          <td><div class="skeleton skeleton-text" style="width: 40px;"></div></td>
+          <td><div class="skeleton skeleton-text" style="width: 120px;"></div></td>
+        </tr>
+      </tbody>
+
+      <!-- ACTUAL TABLE DATA -->
+      <tbody *ngIf="!isLoading()">
+        <tr *ngFor="let lead of paginatedLeads()">
+          <td>
+            <input type="checkbox" [checked]="isLeadSelected(lead.id)" (change)="toggleSelectLead(lead.id)">
+          </td>
+          <td class="lead-name-cell" (click)="openLeadDrawer(lead)">
+            <strong>{{ lead.name }}</strong>
+          </td>
+          <td>{{ lead.phone }}</td>
+          <td><span class="state-badge-us">{{ lead.state }}</span></td>
+          <td>{{ lead.age }}</td>
+          <td class="text-secondary text-sm">{{ lead.interest }}</td>
+          <td>
+            <select class="status-select-badge" [class]="lead.status" [value]="lead.status" (change)="changeStatus(lead.id, $event)">
+              <option *ngFor="let st of statusList" [value]="st.value">{{ st.label }}</option>
+            </select>
+          </td>
+          <td>
+            <select class="agent-assign-select" [value]="lead.assignedAgentId || ''" (change)="assignAgentSingle(lead.id, $event)">
+              <option value="">Sin asignar</option>
+              <option *ngFor="let ag of agentsList()" [value]="ag.id">{{ ag.firstName }} {{ ag.lastName }}</option>
+            </select>
+          </td>
+          <td class="text-secondary text-sm">{{ lead.createdAt | date:'shortDate' }}</td>
+          <td>
+            <span class="uncontacted-warning" *ngIf="lead.noContactDays > 2" [title]="'Sin contactar por ' + lead.noContactDays + ' días'">
+              {{ lead.noContactDays }}d
+            </span>
+            <span class="uncontacted-fine" *ngIf="lead.noContactDays <= 2">
+              {{ lead.noContactDays }}d
+            </span>
+          </td>
+          <td>
+            <div class="row-actions-group">
+              <!-- Dial Call icon -->
+              <button class="action-row-btn call" (click)="startLeadCall(lead)" title="Llamar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </button>
+              <!-- Open Chat icon -->
+              <button class="action-row-btn chat" (click)="openSmsPage(lead)" title="Enviar SMS">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </button>
+              <!-- View detail icon -->
+              <button class="action-row-btn view" (click)="openLeadDrawer(lead)" title="Ver Detalle">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="1"/><path d="M12 5c-8 0-12 7-12 7s4 7 12 7 12-7 12-7-4-7-12-7Z"/></svg>
+              </button>
+              <!-- Discard cross icon -->
+              <button class="action-row-btn discard" (click)="discardLead(lead.id)" title="Descartar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- EMPTY STATE -->
+        <tr *ngIf="paginatedLeads().length === 0">
+          <td colspan="11" class="empty-table-cell">
+            <div class="empty-state-card">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <h3>No se encontraron leads</h3>
+              <p>Intente modificar los filtros o el término de búsqueda para ver más resultados.</p>
+              <button class="btn btn-secondary" (click)="resetFilters()">Reestablecer filtros</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TABLE PAGINATION FOOTER -->
+  <div class="table-pagination-footer" *ngIf="!isLoading() && totalPages() > 1">
+    <button class="btn btn-secondary btn-icon" (click)="setPage(currentPage() - 1)" [disabled]="currentPage() === 1">
+      &larr;
+    </button>
+    <div class="page-numbers">
+      Página <strong>{{ currentPage() }}</strong> de {{ totalPages() }}
+    </div>
+    <button class="btn btn-icon btn-secondary" (click)="setPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()">
+      &rarr;
+    </button>
+  </div>
+</div>
+
+<!-- BULK ASSIGN AGENT MODAL -->
+<div class="modal-backdrop" *ngIf="showBulkAssignModal()" (click)="closeBulkAssign()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Asignación Masiva de Leads</h2>
+      <button class="modal-close" (click)="closeBulkAssign()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="mb-4">Seleccione el agente comercial para asignar los <strong>{{ selectedLeadIds().length }}</strong> leads seleccionados:</p>
+      
+      <div class="form-group">
+        <label>Agente Responsable *</label>
+        <select class="form-control" [ngModel]="bulkSelectedAgentId()" (ngModelChange)="bulkSelectedAgentId.set($event)">
+          <option value="">Seleccione agente...</option>
+          <option *ngFor="let ag of agentsList()" [value]="ag.id">{{ ag.firstName }} {{ ag.lastName }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeBulkAssign()">Cancelar</button>
+      <button class="btn btn-primary" [disabled]="!bulkSelectedAgentId()" (click)="submitBulkAssign()">Asignar Leads</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL SIDEBAR DRAWER (SLIDE OVER PANEL) -->
+<div class="drawer-backdrop" *ngIf="selectedLeadForDrawer()" (click)="closeLeadDrawer()">
+  <div class="drawer-container" (click)="$event.stopPropagation()">
+    <!-- Drawer Header -->
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <h2>{{ selectedLeadForDrawer()?.name }}</h2>
+        <span class="badge" [class]="'badge-' + selectedLeadForDrawer()?.status">
+          {{ selectedLeadForDrawer()?.status }}
+        </span>
+      </div>
+      <button class="drawer-close-btn" (click)="closeLeadDrawer()">&times;</button>
+    </div>
+
+    <!-- Drawer Body Content -->
+    <div class="drawer-body" *ngIf="selectedLeadForDrawer()">
+      <!-- Contact Cards Details -->
+      <div class="drawer-section card-summary">
+        <div class="summary-grid">
+          <div>
+            <span class="label">Teléfono:</span>
+            <span class="value">{{ selectedLeadForDrawer()?.phone }}</span>
+          </div>
+          <div>
+            <span class="label">Ubicación:</span>
+            <span class="value">{{ selectedLeadForDrawer()?.state }} (EE. UU.)</span>
+          </div>
+          <div>
+            <span class="label">Edad:</span>
+            <span class="value">{{ selectedLeadForDrawer()?.age }} años</span>
+          </div>
+          <div>
+            <span class="label">Interés:</span>
+            <span class="value">{{ selectedLeadForDrawer()?.interest }}</span>
+          </div>
+          <div>
+            <span class="label">Campaña:</span>
+            <span class="value">{{ getCampaignName(selectedLeadForDrawer()!.campaignId) }}</span>
+          </div>
+          <div>
+            <span class="label">Salud:</span>
+            <span class="value">{{ selectedLeadForDrawer()?.healthCondition }}</span>
+          </div>
+        </div>
+
+        <div class="summary-actions-row">
+          <button class="btn btn-success" (click)="startLeadCall(selectedLeadForDrawer()!)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Llamar
+          </button>
+          
+          <a class="btn btn-secondary" [routerLink]="['/leads', selectedLeadForDrawer()?.id]" (click)="closeLeadDrawer()">
+            Ver Ficha Completa
+          </a>
+        </div>
+      </div>
+
+      <!-- Live SMS chat panel inside detail drawer -->
+      <div class="drawer-section chat-section">
+        <h3>Conversación SMS</h3>
+        
+        <div class="opted-out-banner" *ngIf="activeDrawerConversation?.optedOut">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          <span>El cliente ha solicitado exclusión de mensajes (Opt-Out).</span>
+        </div>
+
+        <div class="sms-log-box">
+          <div class="sms-empty" *ngIf="!activeDrawerConversation || activeDrawerConversation.messages.length === 0">
+            No hay mensajes registrados.
+          </div>
+          <div class="sms-bubble" 
+               *ngFor="let msg of activeDrawerConversation?.messages" 
+               [class.agent]="msg.sender === 'agent'" 
+               [class.lead]="msg.sender === 'lead'">
+            <div class="bubble-text">{{ msg.text }}</div>
+            <div class="bubble-time">{{ msg.createdAt | date:'shortTime' }}</div>
+          </div>
+        </div>
+
+        <div class="sms-input-panel" *ngIf="!activeDrawerConversation?.optedOut">
+          <input type="text" 
+                 class="form-control text-sm" 
+                 placeholder="Escriba SMS..." 
+                 [ngModel]="newDrawerSms()" 
+                 (ngModelChange)="newDrawerSms.set($event)"
+                 (keyup.enter)="sendDrawerSms()">
+          <button class="btn btn-primary btn-sm" (click)="sendDrawerSms()">
+            Enviar
+          </button>
+        </div>
+      </div>
+
+      <!-- Action timeline logs and adding notes -->
+      <div class="drawer-section notes-section">
+        <h3>Historial y Notas</h3>
+        
+        <!-- Add note form -->
+        <div class="add-note-box">
+          <textarea class="form-control" 
+                    placeholder="Agregar nota interna sobre el lead..." 
+                    rows="2" 
+                    [ngModel]="newDrawerNote()" 
+                    (ngModelChange)="newDrawerNote.set($event)"></textarea>
+          <button class="btn btn-secondary btn-sm mt-2" (click)="addDrawerNote()">
+            Agregar Nota
+          </button>
+        </div>
+
+        <!-- Note items list timeline -->
+        <div class="timeline-logs mt-4">
+          <div class="log-item" *ngFor="let note of selectedLeadForDrawer()?.notes">
+            <div class="log-indicator"></div>
+            <div class="log-content">
+              <p>{{ note }}</p>
+            </div>
+          </div>
+          <div class="sms-empty" *ngIf="!selectedLeadForDrawer()?.notes || selectedLeadForDrawer()?.notes?.length === 0">
+            No hay notas cargadas.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTOMATIC ASSIGNMENT MODAL -->
+<div class="modal-backdrop" *ngIf="showAutoAssignModal()" (click)="closeAutoAssign()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Asignación Automática de Leads</h2>
+      <button class="modal-close" (click)="closeAutoAssign()">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      <!-- Target Leads description -->
+      <div class="target-desc-box mb-4" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 8px;">
+        <p *ngIf="selectedLeadIds().length > 0" style="color: #15803d; font-size: 0.9rem; font-weight: 500; margin: 0;">
+          Se distribuirán los <strong>{{ selectedLeadIds().length }}</strong> leads seleccionados actualmente.
+        </p>
+        <p *ngIf="selectedLeadIds().length === 0" style="color: #15803d; font-size: 0.9rem; font-weight: 500; margin: 0;">
+          No hay leads seleccionados en la tabla. Se distribuirán <strong>todos</strong> los leads en estado <strong>Nuevos</strong>.
+        </p>
+      </div>
+
+      <!-- Mode selector -->
+      <div class="form-group">
+        <label>Criterio de Distribución</label>
+        <div class="radio-group-row" style="display: flex; gap: 24px; margin-top: 6px;">
+          <label class="radio-label" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="radio" name="assignMode" value="balanced" [ngModel]="autoAssignMode()" (ngModelChange)="autoAssignMode.set($event)">
+            <span>Equilibrada (Round-Robin)</span>
+          </label>
+          <label class="radio-label" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="radio" name="assignMode" value="quantity" [ngModel]="autoAssignMode()" (ngModelChange)="autoAssignMode.set($event)">
+            <span>Por Cantidad Fija</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Agents selection list -->
+      <div class="form-group mt-4" style="border-top: 1px solid #e2e8f0; padding-top: 16px;">
+        <label>Seleccionar Agentes Comerciales</label>
+        <div class="agents-selection-list" style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px; max-height: 200px; overflow-y: auto;">
+          <div class="agent-selection-row" *ngFor="let wrap of autoAssignAgents()" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+              <input type="checkbox" [checked]="wrap.checked" (change)="toggleAutoAssignAgent(wrap.agent.id)" style="width: 16px; height: 16px;">
+              <span class="agent-name" style="color: #334155;">{{ wrap.agent.firstName }} {{ wrap.agent.lastName }}</span>
+            </label>
+            
+            <div class="quantity-input-wrapper" *ngIf="autoAssignMode() === 'quantity' && wrap.checked" style="display: flex; align-items: center; gap: 8px;">
+              <span class="qty-label" style="font-size: 0.8rem; color: #64748b;">Cantidad leads:</span>
+              <input type="number" class="form-control qty-field" style="width: 70px; height: 30px; text-align: center;" [value]="wrap.quantity" (change)="setAutoAssignQuantity(wrap.agent.id, $event)" min="1">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer" style="padding: 1rem 1.5rem; background-color: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 0.75rem;">
+      <button class="btn btn-secondary" (click)="closeAutoAssign()">Cancelar</button>
+      <button class="btn btn-primary" (click)="submitAutoAssign()">Iniciar Asignación</button>
+    </div>
+  </div>
+</div>

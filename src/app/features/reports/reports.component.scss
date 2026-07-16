@@ -1,0 +1,89 @@
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  }
+
+  .card-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .card-count {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-top: 0.5rem;
+    line-height: 1;
+
+    &.text-success {
+      color: #16a34a;
+    }
+  }
+
+  .help-text {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 0.5rem;
+  }
+}
+
+.reports-charts-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-top: 1.5rem;
+}
+
+.chart-card {
+  padding: 1.5rem;
+  
+  .chart-header {
+    margin-bottom: 1.25rem;
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .chart-subtitle {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+  }
+}
+
+.canvas-wrapper {
+  position: relative;
+  height: 320px;
+  width: 100%;
+
+  &.doughnut {
+    height: 250px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .reports-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}

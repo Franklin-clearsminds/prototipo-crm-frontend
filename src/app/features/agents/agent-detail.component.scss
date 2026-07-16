@@ -1,0 +1,141 @@
+.agent-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 2.5fr;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.profile-card-column {
+  .agent-profile-card {
+    text-align: center;
+    padding: 2rem 1.5rem;
+
+    .profile-avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #bfdbfe;
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .email-label {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+  }
+}
+
+.agent-profile-details {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+
+    .label {
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .value {
+      color: #0f172a;
+      font-weight: 600;
+    }
+  }
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+/* KPIs cards grid */
+.kpis-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1rem;
+
+  .kpi-title {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  .kpi-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 6px;
+  }
+}
+
+.assigned-leads-card {
+  padding: 1.5rem;
+
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+}
+
+.clickable-row {
+  cursor: pointer;
+  &:hover {
+    background-color: #f8fafc;
+  }
+}
+
+.status-badge-inline {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+
+  &.new { background-color: #eff6ff; color: #1d4ed8; }
+  &.assigned { background-color: #f0fdf4; color: #15803d; }
+  &.contacted { background-color: #ecfdf5; color: #047857; }
+  &.no_answer { background-color: #fffbeb; color: #b45309; }
+  &.follow_up { background-color: #faf5ff; color: #7e22ce; }
+  &.appointment { background-color: #f5f3ff; color: #6d28d9; }
+  &.sold { background-color: #ecfdf5; color: #15803d; }
+  &.discarded { background-color: #f1f5f9; color: #475569; }
+}
+
+.empty-cell {
+  text-align: center;
+  padding: 2rem !important;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 1024px) {
+  .agent-detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .kpis-mini-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -1,0 +1,132 @@
+.agent-profile-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .agent-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #cbd5e1;
+  }
+
+  .agent-meta {
+    display: flex;
+    flex-direction: column;
+    
+    strong {
+      color: #0f172a;
+      font-size: 0.9rem;
+    }
+    span {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+  }
+}
+
+.agent-status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+
+  &.active { background-color: #dcfce7; color: #15803d; }
+  &.busy { background-color: #fef3c7; color: #d97706; }
+  &.inactive { background-color: #f1f5f9; color: #475569; }
+}
+
+.badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.state-mini-badge {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+/* Checkbox State button grids */
+.checkbox-badge-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 6px;
+
+  .checkbox-badge-btn {
+    padding: 6px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #f8fafc;
+      border-color: #94a3b8;
+    }
+
+    &.selected {
+      background-color: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+  }
+}
+
+.lines-select-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+
+  .line-badge-btn {
+    padding: 6px 10px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #f8fafc;
+    }
+
+    &.selected {
+      background-color: #10b981;
+      color: #ffffff;
+      border-color: #10b981;
+    }
+  }
+}
+
+.drawer-footer {
+  padding: 1rem 1.5rem;
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.help-text {
+  color: #94a3b8;
+}
+
+.font-bold { font-weight: 700; }
+.text-indigo { color: #4f46e5; }
+.text-success { color: #16a34a; }

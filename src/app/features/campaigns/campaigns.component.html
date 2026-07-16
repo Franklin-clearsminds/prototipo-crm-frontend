@@ -1,0 +1,93 @@
+<div class="page-header">
+  <div class="page-title">
+    <h1>{{ t('camp.title') }}</h1>
+    <div class="breadcrumb">
+      <span>InsureFlow</span>
+      <span class="separator"></span>
+      <span class="active">{{ t('menu.campaigns') }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- ADS CAMPAIGNS SUMMARY LIST -->
+<div class="campaigns-section-title">
+  <h2>Campañas de Publicidad Digital</h2>
+  <p>Monitoreo de leads calificados entrantes por fuente de anuncios activos en tiempo real.</p>
+</div>
+
+<div class="campaigns-list-grid mt-4">
+  <div class="campaign-list-card card" *ngFor="let camp of campaigns()">
+    <div class="camp-card-header">
+      <div class="source-icon" [class]="camp.source">
+        <!-- SVG source indicator -->
+        <span class="source-letter">{{ camp.source.charAt(0).toUpperCase() }}</span>
+      </div>
+      <div class="camp-meta">
+        <h3>{{ camp.name }}</h3>
+        <span>Creada el {{ camp.createdAt | date:'shortDate' }}</span>
+      </div>
+    </div>
+    <div class="camp-card-stats mt-4">
+      <div class="stat-col">
+        <span class="stat-label">Leads Recibidos:</span>
+        <span class="stat-val font-bold text-lg">{{ camp.leadsGenerated }}</span>
+      </div>
+      <div class="stat-col">
+        <span class="stat-label">Presupuesto invertido:</span>
+        <span class="stat-val font-bold text-slate">${{ camp.cost || '0.00' }}</span>
+      </div>
+      <div class="stat-col">
+        <span class="stat-label">Estado:</span>
+        <span class="badge" [class.badge-available]="camp.status === 'active'" [class.badge-suspended]="camp.status === 'paused'">
+          {{ camp.status === 'active' ? 'Activo' : 'Pausado' }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- API INTEGRATIONS CONNECTORS LIST -->
+<div class="campaigns-section-title mt-8">
+  <h2>Conectores e Integraciones API</h2>
+  <p>Enlace de pasarelas de comunicación Twilio, CRM externos como GoHighLevel e ingresos de Meta Ads.</p>
+</div>
+
+<div class="integrations-grid mt-4">
+  <div class="integration-card card" *ngFor="let int of integrations()" [class]="int.status">
+    <div class="int-header">
+      <div class="icon-indicator flex-center font-bold">
+        {{ int.name.charAt(0) }}
+      </div>
+      <div class="int-meta">
+        <h3>{{ int.name }}</h3>
+        <span class="sync-date" *ngIf="int.lastSyncedAt">Sincronizado: {{ int.lastSyncedAt | date:'shortTime' }}</span>
+        <span class="sync-date" *ngIf="!int.lastSyncedAt">Sin sincronizar</span>
+      </div>
+    </div>
+
+    <div class="int-body mt-4">
+      <div class="int-stats">
+        <span>Leads Procesados: <strong>{{ int.leadsReceivedCount }}</strong></span>
+      </div>
+
+      <!-- Sync warning details -->
+      <div class="error-details-box" *ngIf="int.recentErrors && int.recentErrors.length > 0">
+        <p class="error-msg" *ngFor="let err of int.recentErrors">&times; {{ err }}</p>
+      </div>
+
+      <div class="status-badge-row">
+        <span>Estado:</span>
+        <span class="int-status-tag" [class]="int.status">
+          {{ int.status === 'connected' ? 'Conectado' : int.status === 'warning' ? 'Advertencia' : int.status === 'unconfigured' ? 'Sin Configurar' : 'Desconectado' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="int-actions mt-6">
+      <button class="btn btn-secondary btn-sm" (click)="configureIntegration(int)">Configurar</button>
+      <button class="btn btn-sm" [class.btn-primary]="int.status !== 'connected'" [class.btn-danger]="int.status === 'connected'" (click)="toggleConnection(int.id)">
+        {{ int.status === 'connected' ? 'Desconectar' : 'Conectar' }}
+      </button>
+    </div>
+  </div>
+</div>
