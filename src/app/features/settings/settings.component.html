@@ -18,17 +18,17 @@
           Mi Perfil
         </button>
       </li>
-      <li>
+      <li *ngIf="authService.isAdmin()">
         <button [class.active]="activeTab() === 'general'" (click)="setTab('general')">
           Datos de la Empresa
         </button>
       </li>
-      <li>
+      <li *ngIf="authService.isAdmin()">
         <button [class.active]="activeTab() === 'routing'" (click)="setTab('routing')">
           Reglas de Asignación
         </button>
       </li>
-      <li>
+      <li *ngIf="authService.isAdmin()">
         <button [class.active]="activeTab() === 'templates'" (click)="setTab('templates')">
           Plantillas de Mensajes
         </button>
@@ -79,7 +79,7 @@
     </div>
 
     <!-- TAB 1: General Profile settings -->
-    <div class="settings-pane" *ngIf="activeTab() === 'general'">
+    <div class="settings-pane" *ngIf="authService.isAdmin() && activeTab() === 'general'">
       <h3>Información de la Organización</h3>
       <p class="section-desc">Datos generales del CRM y configuraciones corporativas para el envío de propuestas.</p>
       
@@ -115,7 +115,7 @@
     </div>
 
     <!-- TAB 2: Routing allocation rules -->
-    <div class="settings-pane" *ngIf="activeTab() === 'routing'">
+    <div class="settings-pane" *ngIf="authService.isAdmin() && activeTab() === 'routing'">
       <h3>Reglas de Distribución de Leads</h3>
       <p class="section-desc">Regule cómo se asignan los leads entrantes de campañas digitales a los agentes comerciales.</p>
 
@@ -146,7 +146,7 @@
     </div>
 
     <!-- TAB 3: Message templates registration -->
-    <div class="settings-pane" *ngIf="activeTab() === 'templates'">
+    <div class="settings-pane" *ngIf="authService.isAdmin() && activeTab() === 'templates'">
       <h3>Plantillas de Mensajes SMS</h3>
       <p class="section-desc">Configure respuestas rápidas precargadas utilizables en los drawers y centro de mensajería.</p>
 
