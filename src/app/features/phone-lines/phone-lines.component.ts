@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MockPhoneLineService } from '../../core/services/phone-line.service';
 import { MockAgentService } from '../../core/services/agent.service';
+import { MockAuthService } from '../../core/services/auth.service';
 import { LanguageService } from '../../core/services/language.service';
 import { PhoneLine, PhoneLineStatus } from '../../core/models';
 
@@ -16,6 +17,7 @@ import { PhoneLine, PhoneLineStatus } from '../../core/models';
 export class PhoneLinesComponent {
   phoneLineService = inject(MockPhoneLineService);
   agentService = inject(MockAgentService);
+  authService = inject(MockAuthService);
   langService = inject(LanguageService);
   private fb = inject(FormBuilder);
 
